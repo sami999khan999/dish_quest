@@ -22,7 +22,7 @@ const App = () => {
     inputRef.current.blur();
 
     setRecipes([]);
-    // setError("");
+    setError("");
   };
 
   const getData = async (searchQuery) => {
