@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useFetch } from "../hooks/useFetch";
+import { useEffect, useState } from "react";
 
-const Recipeitem = () => {
+const Recipeitem = ({ addFavouriteHandeler, savedItems }) => {
   const { id } = useParams();
-
   const { recipe, loading, error } = useFetch(id);
-
-  console.log(recipe);
+  const [itemSavedStatus, setItemSavedStatus] = useState(null);
 
   const durationCalk = (duration) => {
     if (!duration) return;
@@ -25,6 +23,12 @@ const Recipeitem = () => {
       return hour + minutes;
     }
   };
+
+  useEffect(() => {
+    if (!recipe) return;
+
+    setItemSavedStatus(savedItems.some((item) => item.id === recipe.id));
+  }, [recipe]);
 
   return (
     <div className="recipe-item-section container mx-auto py-20 grid grid-cols-1 lg:grid-cols-2 gap-10 ">
@@ -65,8 +69,13 @@ const Recipeitem = () => {
           </div>
         </div>
         <div className="btns flex gap-5">
-          <button className="bg-gradient-to-br from-sky-400 to-sky-600 text-sky-50 p-3 px-8 rounded-lg text-sm uppercase font-medium tracking-wider mt-2 inline-block shadow-md shadow-sky-200 hover:shadow-lg hover:shadow-sky-300 duration-300">
-            + Save as facourite
+          <button
+            onClick={() => addFavouriteHandeler(recipe?.id)}
+            className="bg-gradient-to-br from-sky-400 to-sky-600 text-sky-50 p-3 px-8 rounded-lg text-sm uppercase font-medium tracking-wider mt-2 inline-block shadow-md shadow-sky-200 hover:shadow-lg hover:shadow-sky-300 duration-300"
+          >
+            {itemSavedStatus
+              ? "- Remeve from favourites"
+              : "+ Add to favourites"}
           </button>
           <a
             href={recipe?.source_url}

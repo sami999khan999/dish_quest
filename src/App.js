@@ -1,5 +1,5 @@
-import { Route, Routes } from "react-router-dom";
-import { useRef, useState } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -10,9 +10,14 @@ import Recipeitem from "./components/Recipeitem";
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef(null);
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [savedItems, setSavedItems] = useState(() => {
+    const localData = localStorage.getItem("recipes");
+    return localData ? JSON.parse(localData) : [];
+  });
 
   const searchHandeler = (e) => {
     e.preventDefault();
@@ -23,6 +28,7 @@ const App = () => {
 
     setRecipes([]);
     setError("");
+    navigate("/");
   };
 
   const getData = async (searchQuery) => {
@@ -41,10 +47,35 @@ const App = () => {
     }
   };
 
+  const checkLocalData = (data) => {
+    const localData = JSON.parse(localStorage.getItem("recipes"));
+    const existedData = localData?.some((item) => item.id === data.id);
+
+    if (!existedData) {
+      setSavedItems([...savedItems, data]);
+    } else {
+      const filteresData = localData.filter((item) => item.id !== data.id);
+      setSavedItems(filteresData);
+    }
+  };
+
+  const addFavouriteHandeler = (id) => {
+    fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`)
+      .then((res) => res.json())
+      .then((data) => checkLocalData(data.data.recipe));
+
+    navigate("/favourites");
+  };
+
+  useEffect(() => {
+    localStorage.setItem("recipes", JSON.stringify(savedItems));
+  }, [savedItems]);
+
   return (
     <>
       <div className="app min-h-screen bg-rose-50 text-gray-600 text-lg">
         <Navbar
+          savedItems={savedItems}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           inputRef={inputRef}
@@ -55,8 +86,19 @@ const App = () => {
             path="/"
             element={<Home recipes={recipes} loading={loading} error={error} />}
           />
-          <Route path="/favourites" element={<Favourites />} />
-          <Route path="/recipe-item/:id" element={<Recipeitem />} />
+          <Route
+            path="/favourites"
+            element={<Favourites savedItems={savedItems} />}
+          />
+          <Route
+            path="/recipe-item/:id"
+            element={
+              <Recipeitem
+                addFavouriteHandeler={addFavouriteHandeler}
+                savedItems={savedItems}
+              />
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
