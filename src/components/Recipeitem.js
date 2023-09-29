@@ -71,7 +71,11 @@ const Recipeitem = ({ addFavouriteHandeler, savedItems }) => {
         <div className="btns flex gap-5">
           <button
             onClick={() => addFavouriteHandeler(recipe?.id)}
-            className="bg-gradient-to-br from-sky-400 to-sky-600 text-sky-50 p-3 px-8 rounded-lg text-sm uppercase font-medium tracking-wider mt-2 inline-block shadow-md shadow-sky-200 hover:shadow-lg hover:shadow-sky-300 duration-300"
+            className={`bg-gradient-to-br  p-3 px-8 rounded-lg text-sm uppercase font-medium tracking-wider mt-2 inline-block shadow-md  hover:shadow-lg  ${
+              itemSavedStatus
+                ? "duration-300 from-orange-400 to-orange-600 text-orange-50 hover:shadow-orange-300 shadow-orange-200"
+                : "duration-300 from-sky-400 to-sky-600 text-sky-50 hover:shadow-sky-300 shadow-sky-200"
+            }`}
           >
             {itemSavedStatus
               ? "- Remeve from favourites"
